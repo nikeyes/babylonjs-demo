@@ -36,7 +36,6 @@
         
             var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, 0, -20), scene);
             camera.attachControl(canvas, true);
-            camera.setTarget(new BABYLON.Vector3(0, 0, 0));
         
             var light = new BABYLON.DirectionalLight("dir02", new BABYLON.Vector3(0.2, -1, 0), scene);
             light.position = new BABYLON.Vector3(0, 80, 0);
@@ -61,7 +60,7 @@
             // Spheres
             var y = 0;
             for (var index = 0; index < 100; index++) {
-                var sphere = BABYLON.Mesh.CreateSphere("Sphere0", 16, 3, scene);
+                var sphere = BABYLON.Mesh.CreateSphere("Sphere"+index, 16, 3, scene);
                
                 sphere.material = materialAmiga;
 
@@ -74,8 +73,23 @@
                                                                     , { mass: 1 }, scene);
          
                 y += 2;
+                
+               
             }
         
+
+           
+
+             window.addEventListener("click", function (evt) {
+                // We try to pick an object
+                    var pickResult = scene.pick(evt.clientX, evt.clientY);
+                    if (pickResult.hit) {
+                        currentMesh = pickResult.pickedMesh;
+                        currentMesh.physicsImpostor.applyImpulse(new BABYLON.Vector3(0, 0, 100)
+                                                                , currentMesh.getAbsolutePosition());
+                
+                    }
+                });
         
             // Playground
             var ground = BABYLON.Mesh.CreateBox("Ground", 1, scene);
@@ -117,6 +131,9 @@
                                                                 , BABYLON.PhysicsImpostor.BoxImpostor
                                                                 , { mass: 0 }
                                                                 , scene);
+
+            //scene.debugLayer.show();
+
             return scene;
         }
         
