@@ -42,7 +42,7 @@
         
           // Material
             var materialAmiga = new BABYLON.StandardMaterial("amiga", scene);
-            materialAmiga.diffuseTexture = new BABYLON.Texture("textures/ball.jpg", scene);
+            materialAmiga.diffuseTexture = new BABYLON.Texture("textures/cuadrados.jpg", scene);
             materialAmiga.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5);
             materialAmiga.diffuseTexture.uScale = 3;
             materialAmiga.diffuseTexture.vScale = 3;
@@ -64,7 +64,7 @@
                
                 sphere.material = materialAmiga;
 
-                sphere.position = new BABYLON.Vector3(Math.random() * 20 - 10, y, Math.random() * 10 - 5);
+                sphere.position = new BABYLON.Vector3(Math.random() * 10, y, Math.random() * 10);
 
                 shadowGenerator.addShadowCaster(sphere);
         
@@ -76,9 +76,6 @@
                 
                
             }
-        
-
-           
 
              window.addEventListener("click", function (evt) {
                 // We try to pick an object
@@ -128,6 +125,26 @@
             paredIzquierda.checkCollisions = true;
             paredIzquierda.material = groundMat;
             paredIzquierda.physicsImpostor = new BABYLON.PhysicsImpostor(paredIzquierda
+                                                                , BABYLON.PhysicsImpostor.BoxImpostor
+                                                                , { mass: 0 }
+                                                                , scene);
+
+
+            var materialPorterial = new BABYLON.StandardMaterial("materialPorterial", scene);
+            materialPorterial.diffuseTexture = new BABYLON.Texture("textures/cuadrados.jpg", scene);
+            materialPorterial.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+            materialPorterial.diffuseTexture.uScale = 50;
+            materialPorterial.diffuseTexture.vScale = 50;
+            materialPorterial.alpha = 0.5;
+
+            var porteria = BABYLON.Mesh.CreateBox("porteria", 1, scene);
+            porteria.scaling = new BABYLON.Vector3(60, 40, 1);
+            porteria.position.y = -5.0;
+            porteria.position.x = 0.0;
+            porteria.position.z = 50.0;
+            porteria.checkCollisions = true;
+            porteria.material = materialPorterial;
+            porteria.physicsImpostor = new BABYLON.PhysicsImpostor(porteria
                                                                 , BABYLON.PhysicsImpostor.BoxImpostor
                                                                 , { mass: 0 }
                                                                 , scene);
