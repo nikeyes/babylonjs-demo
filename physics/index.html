@@ -43,8 +43,16 @@
         
           // Material
             var materialAmiga = new BABYLON.StandardMaterial("amiga", scene);
-            materialAmiga.diffuseTexture = new BABYLON.Texture("textures/amiga.jpg", scene);
+            materialAmiga.diffuseTexture = new BABYLON.Texture("textures/ball.jpg", scene);
             materialAmiga.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+            materialAmiga.diffuseTexture.uScale = 3;
+            materialAmiga.diffuseTexture.vScale = 3;
+
+             // Shadows
+             var shadowGenerator = new BABYLON.ShadowGenerator(2048, light);
+        	shadowGenerator.useBlurExponentialShadowMap = true;
+            shadowGenerator.useKernelBlur = true;
+            shadowGenerator.blurKernel = 32;
 
             // Physics
             //scene.enablePhysics(null, new BABYLON.CannonJSPlugin());
@@ -52,15 +60,18 @@
         
             // Spheres
             var y = 0;
-            for (var index = 0; index < 200; index++) {
+            for (var index = 0; index < 100; index++) {
                 var sphere = BABYLON.Mesh.CreateSphere("Sphere0", 16, 3, scene);
                
                 sphere.material = materialAmiga;
-                
+
                 sphere.position = new BABYLON.Vector3(Math.random() * 20 - 10, y, Math.random() * 10 - 5);
+
+                shadowGenerator.addShadowCaster(sphere);
         
-                sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.SphereImpostor
-                    , { mass: 1 }, scene);
+                sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere
+                                                                    , BABYLON.PhysicsImpostor.SphereImpostor
+                                                                    , { mass: 1 }, scene);
          
                 y += 2;
             }
@@ -70,11 +81,42 @@
             var ground = BABYLON.Mesh.CreateBox("Ground", 1, scene);
             ground.scaling = new BABYLON.Vector3(100, 1, 100);
             ground.position.y = -5.0;
-           
-            // Physics
-            ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor
-                , { mass: 0, friction: 0.5, restitution: 0.7 }, scene);
 
+            var groundMat = new BABYLON.StandardMaterial("groundMat", scene);
+            groundMat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+            groundMat.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+            groundMat.backFaceCulling = false;
+            ground.material = groundMat;
+           
+            ground.receiveShadows = true;
+            // Physics
+            ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground
+                                                                , BABYLON.PhysicsImpostor.BoxImpostor
+                                                                , { mass: 0, friction: 0.5, restitution: 0.7 }
+                                                                , scene);
+
+
+            var paredDerecha = BABYLON.Mesh.CreateBox("paredDerecha", 1, scene);
+            paredDerecha.scaling = new BABYLON.Vector3(1, 100, 100);
+            paredDerecha.position.y = -5.0;
+            paredDerecha.position.x = 50.0;
+            paredDerecha.checkCollisions = true;
+            paredDerecha.material = groundMat;
+            paredDerecha.physicsImpostor = new BABYLON.PhysicsImpostor(paredDerecha
+                                                                , BABYLON.PhysicsImpostor.BoxImpostor
+                                                                , { mass: 0 }
+                                                                , scene);
+
+            var paredIzquierda = BABYLON.Mesh.CreateBox("paredIzquierda", 1, scene);
+            paredIzquierda.scaling = new BABYLON.Vector3(1, 100, 100);
+            paredIzquierda.position.y = -5.0;
+            paredIzquierda.position.x = -50.0;
+            paredIzquierda.checkCollisions = true;
+            paredIzquierda.material = groundMat;
+            paredIzquierda.physicsImpostor = new BABYLON.PhysicsImpostor(paredIzquierda
+                                                                , BABYLON.PhysicsImpostor.BoxImpostor
+                                                                , { mass: 0 }
+                                                                , scene);
             return scene;
         }
         
