@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <title>Babylon.js sample code</title>
+
+        <!-- Babylon.js -->
+        <script src="pep.min.js"></script>
+        <script src="dat.gui.min.js"></script>
+        <script src="Oimo.js"></script>
+        <script src="earcut.min.js"></script>
+        <script src="babylon.js"></script>
+        <script src="cannon.js"></script>
+        <script src="babylon.inspector.bundle.js"></script>
+        <script src="babylonjs.materials.min.js"></script>
+        <script src="babylonjs.proceduralTextures.min.js"></script>
+        <script src="babylonjs.postProcess.min.js"></script>
+        <script src="babylonjs.loaders.js"></script>
+        <script src="babylonjs.serializers.min.js"></script>
+        <script src="babylon.gui.min.js"></script>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+        </style>
+    </head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+        var engine = new BABYLON.Engine(canvas, true);
+
+        var createScene = function () {
+            var scene = new BABYLON.Scene(engine);
+            scene.clearColor = BABYLON.Color3.Purple();
+        
+            var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, 0, -20), scene);
+            camera.attachControl(canvas, true);
+            camera.setTarget(new BABYLON.Vector3(0, 0, 0));
+        
+            var light = new BABYLON.DirectionalLight("dir02", new BABYLON.Vector3(0.2, -1, 0), scene);
+            light.position = new BABYLON.Vector3(0, 80, 0);
+        
+            // Physics
+            //scene.enablePhysics(null, new BABYLON.CannonJSPlugin());
+            scene.enablePhysics(null, new BABYLON.OimoJSPlugin());
+        
+            // Spheres
+            var y = 0;
+            for (var index = 0; index < 200; index++) {
+                var sphere = BABYLON.Mesh.CreateSphere("Sphere0", 16, 3, scene);
+               
+                sphere.position = new BABYLON.Vector3(Math.random() * 20 - 10, y, Math.random() * 10 - 5);
+        
+                sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.SphereImpostor
+                    , { mass: 1 }, scene);
+         
+                y += 2;
+            }
+        
+        
+            // Playground
+            var ground = BABYLON.Mesh.CreateBox("Ground", 1, scene);
+            ground.scaling = new BABYLON.Vector3(100, 1, 100);
+            ground.position.y = -5.0;
+           
+            // Physics
+            ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor
+                , { mass: 0, friction: 0.5, restitution: 0.7 }, scene);
+
+            return scene;
+        }
+        
+        
+        var scene = createScene()
+
+        engine.runRenderLoop(function () {
+            if (scene) {
+                scene.render();
+            }
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>
