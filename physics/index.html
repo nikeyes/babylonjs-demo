@@ -41,6 +41,11 @@
             var light = new BABYLON.DirectionalLight("dir02", new BABYLON.Vector3(0.2, -1, 0), scene);
             light.position = new BABYLON.Vector3(0, 80, 0);
         
+          // Material
+            var materialAmiga = new BABYLON.StandardMaterial("amiga", scene);
+            materialAmiga.diffuseTexture = new BABYLON.Texture("textures/amiga.jpg", scene);
+            materialAmiga.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+
             // Physics
             //scene.enablePhysics(null, new BABYLON.CannonJSPlugin());
             scene.enablePhysics(null, new BABYLON.OimoJSPlugin());
@@ -50,6 +55,8 @@
             for (var index = 0; index < 200; index++) {
                 var sphere = BABYLON.Mesh.CreateSphere("Sphere0", 16, 3, scene);
                
+                sphere.material = materialAmiga;
+                
                 sphere.position = new BABYLON.Vector3(Math.random() * 20 - 10, y, Math.random() * 10 - 5);
         
                 sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.SphereImpostor
