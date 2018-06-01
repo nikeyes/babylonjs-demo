@@ -151,12 +151,11 @@
                                                                 , { mass: 0 }
                                                                 , scene);
 
-             var materialCollision = BABYLON.Material.Parse(materialAmiga, scene);
-             materialCollision.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
+            var materialCollision = materialAmiga.clone('materialCollision');
+            materialCollision.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
             scene.registerBeforeRender(function() {
                 for (var i = 0; i < balls.length; i++) {
                     if (porteria.intersectsMesh(balls[i])){
-                        // do something or maybe return something
                             balls[i].material= materialCollision;
                         }
                     }
