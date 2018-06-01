@@ -59,6 +59,7 @@
         
             // Spheres
             var y = 0;
+            var balls = [];
             for (var index = 0; index < 100; index++) {
                 var sphere = BABYLON.Mesh.CreateSphere("Sphere"+index, 16, 3, scene);
                
@@ -73,8 +74,9 @@
                                                                     , { mass: 1 }, scene);
          
                 y += 2;
+
+                balls.push(sphere);
                 
-               
             }
 
              window.addEventListener("click", function (evt) {
@@ -148,6 +150,18 @@
                                                                 , BABYLON.PhysicsImpostor.BoxImpostor
                                                                 , { mass: 0 }
                                                                 , scene);
+
+             var materialCollision = BABYLON.Material.Parse(materialAmiga, scene);
+             materialCollision.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
+            scene.registerBeforeRender(function() {
+                for (var i = 0; i < balls.length; i++) {
+                    if (porteria.intersectsMesh(balls[i])){
+                        // do something or maybe return something
+                            balls[i].material= materialCollision;
+                        }
+                    }
+                });
+                    
 
             /*var marcador = BABYLON.Mesh.CreateBox("porteria", 1, scene);
             marcador.scaling = new BABYLON.Vector3(50, 10, 1);
