@@ -42,10 +42,8 @@
         
           // Material
             var materialAmiga = new BABYLON.StandardMaterial("amiga", scene);
-            materialAmiga.diffuseTexture = new BABYLON.Texture("textures/cuadrados.jpg", scene);
+            materialAmiga.diffuseTexture = new BABYLON.Texture("textures/adidas.png", scene);
             materialAmiga.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5);
-            materialAmiga.diffuseTexture.uScale = 3;
-            materialAmiga.diffuseTexture.vScale = 3;
 
              // Shadows
              var shadowGenerator = new BABYLON.ShadowGenerator(2048, light);
@@ -96,8 +94,9 @@
             ground.position.y = -5.0;
 
             var groundMat = new BABYLON.StandardMaterial("groundMat", scene);
-            groundMat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
-            groundMat.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+            groundMat.diffuseTexture = new BABYLON.Texture("textures/field.jpg", scene);
+            //groundMat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+            //groundMat.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
             groundMat.backFaceCulling = false;
             ground.material = groundMat;
            
@@ -153,16 +152,22 @@
 
             var materialCollision = materialAmiga.clone('materialCollision');
             materialCollision.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
+
+            var goles = 0;
             scene.registerBeforeRender(function() {
                 for (var i = 0; i < balls.length; i++) {
                     if (porteria.intersectsMesh(balls[i])){
                             balls[i].material= materialCollision;
+                            /*goles++;
+                            balls.remove(ball[i]);
+                            textureScore.clear();
+                            textureScore.drawText(goles, 10, 50, "bold 30px Arial", "green", "white", true, true);*/
                         }
                     }
                 });
                     
 
-            /*var marcador = BABYLON.Mesh.CreateBox("porteria", 1, scene);
+            var marcador = BABYLON.Mesh.CreateBox("porteria", 1, scene);
             marcador.scaling = new BABYLON.Vector3(50, 10, 1);
             marcador.position.y = 20.0;
             marcador.position.x = 0.0;
@@ -174,10 +179,8 @@
             materialScore.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5); 				
             materialScore.diffuseTexture = textureScore;
             marcador.material = materialScore;
-            
-            //Add text to dynamic 
-            textureScore.drawText("100", 10, 50, "bold 30px Arial", "green", "white", true, true);
-	        */
+            textureScore.drawText(0, 10, 50, "bold 30px Arial", "green", "white", true, true);
+            	        
             //scene.debugLayer.show();
 
             return scene;
@@ -192,7 +195,6 @@
             }
         });
 
-        // Resize
         window.addEventListener("resize", function () {
             engine.resize();
         });
