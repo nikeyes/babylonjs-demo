@@ -4,6 +4,7 @@ var engine = new BABYLON.Engine(canvas, true);
 function getScene() {
     var scene = new BABYLON.Scene(engine);
     scene.clearColor = BABYLON.Color3.Purple();
+    scene.collisionsEnabled = true;
     return scene;
 }
 
@@ -11,9 +12,19 @@ function createCameras(scene) {
     //var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, 0, -20), scene);
     //var camera = new BABYLON.VRDeviceOrientationFreeCamera("vr-camera", new BABYLON.Vector3(0, 0, -20), scene);
     var camera = new BABYLON.DeviceOrientationCamera("DevOr_camera", new BABYLON.Vector3(0, 0, -20), scene);
-    camera.angularSensibility = 10;
-    camera.moveSensibility = 10;
+    //camera.angularSensibility = 10;
+    //camera.moveSensibility = 10;
+    camera.ellipsoid = new BABYLON.Vector3(1, 1, 1);
+
+    camera.checkCollisions = true;
     camera.attachControl(canvas, true);
+
+    camera.onCollide = function (colMesh) {
+		if (colMesh.name.includes("Sphere")) {
+			colMesh.physicsImpostor.applyImpulse(new BABYLON.Vector3(0, 0, 100) //impulse
+                , currentMesh.getAbsolutePosition());
+		}
+	}
 
     
 /*
@@ -79,6 +90,7 @@ function createBall(name, scene, ballMaterial, shadowGenerator, balls) {
     sphere.material = ballMaterial;
     sphere.position = new BABYLON.Vector3(Math.random() * 10, Math.random() * 250, Math.random() * 10);
     shadowGenerator.addShadowCaster(sphere);
+    sphere.checkCollisions = true;
     sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1 }, scene);
     balls.push(sphere);
 }
