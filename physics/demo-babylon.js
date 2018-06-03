@@ -53,7 +53,11 @@ var createScene = function () {
             var pickResult = scene.pick(evt.clientX, evt.clientY);
             if (pickResult.hit) {
                 currentMesh = pickResult.pickedMesh;
-                currentMesh.physicsImpostor.applyImpulse(new BABYLON.Vector3(0, 0, 100)
+                 // Calculate the direction using the picked point and the ball's position. 
+                //var direction = pickResult.pickedPoint.subtract(currentMesh.position).normalize();
+                // Give it a bit more power (scale the normalized direction).
+                //var impulse = direction.scale(-20);
+                currentMesh.physicsImpostor.applyImpulse(new BABYLON.Vector3(0, 0, 100)//impulse
                                                         , currentMesh.getAbsolutePosition());
         
             }
