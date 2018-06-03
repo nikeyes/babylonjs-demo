@@ -1,131 +1,176 @@
 var canvas = document.getElementById("renderCanvas");
 var engine = new BABYLON.Engine(canvas, true);
 
-var createScene = function () {
+function getScene() {
     var scene = new BABYLON.Scene(engine);
     scene.clearColor = BABYLON.Color3.Purple();
+    return scene;
+}
 
+function createCameras(scene) {
     var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, 0, -20), scene);
     camera.attachControl(canvas, true);
+}
 
-    var light = new BABYLON.DirectionalLight("dir02", new BABYLON.Vector3(0.2, -1, 0), scene);
+function createLights(scene) {
+    var light = new BABYLON.DirectionalLight("dir-light-01", new BABYLON.Vector3(0.2, -1, 0), scene);
     light.position = new BABYLON.Vector3(0, 80, 0);
+    return light;
+}
 
-  // Material
-    var materialAmiga = new BABYLON.StandardMaterial("amiga", scene);
-    materialAmiga.diffuseTexture = new BABYLON.Texture("textures/adidas.png", scene);
-    materialAmiga.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5);
-
-     // Shadows
-     var shadowGenerator = new BABYLON.ShadowGenerator(2048, light);
+function createShadowGenerator(light) {
+    var shadowGenerator = new BABYLON.ShadowGenerator(2048, light);
     shadowGenerator.useBlurExponentialShadowMap = true;
     shadowGenerator.useKernelBlur = true;
     shadowGenerator.blurKernel = 32;
+    return shadowGenerator;
+}
 
-    // Physics
+function createBallMaterial(scene) {
+    var ballMaterial = new BABYLON.StandardMaterial("ball-material", scene);
+    ballMaterial.diffuseTexture = new BABYLON.Texture("textures/adidas.png", scene);
+    ballMaterial.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+    return ballMaterial;
+}
+
+function enablePhysics(scene) {
     //scene.enablePhysics(null, new BABYLON.CannonJSPlugin());
     scene.enablePhysics(null, new BABYLON.OimoJSPlugin());
+}
 
-    // Spheres
-    var y = 0;
+function createBalls(scene, ballMaterial, shadowGenerator) {
     var balls = [];
     for (var index = 0; index < 100; index++) {
-        var sphere = BABYLON.Mesh.CreateSphere("Sphere"+index, 16, 3, scene);
-       
-        sphere.material = materialAmiga;
-
-        sphere.position = new BABYLON.Vector3(Math.random() * 10, y, Math.random() * 10);
-
-        shadowGenerator.addShadowCaster(sphere);
-
-        sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere
-                                                            , BABYLON.PhysicsImpostor.SphereImpostor
-                                                            , { mass: 1 }, scene);
- 
-        y += 2;
-
-        balls.push(sphere);
-        
+        createBall(index, scene, ballMaterial, shadowGenerator, balls);
     }
+    return balls;
+}
 
-     window.addEventListener("click", function (evt) {
-        // We try to pick an object
-            var pickResult = scene.pick(evt.clientX, evt.clientY);
-            if (pickResult.hit) {
-                currentMesh = pickResult.pickedMesh;
-                 // Calculate the direction using the picked point and the ball's position. 
-                //var direction = pickResult.pickedPoint.subtract(currentMesh.position).normalize();
-                // Give it a bit more power (scale the normalized direction).
-                //var impulse = direction.scale(-20);
-                currentMesh.physicsImpostor.applyImpulse(new BABYLON.Vector3(0, 0, 100)//impulse
-                                                        , currentMesh.getAbsolutePosition());
-        
-            }
-        });
+function createBall(name, scene, ballMaterial, shadowGenerator, balls) {
+    var sphere = BABYLON.Mesh.CreateSphere("Sphere" + name, 16, 3, scene);
+    sphere.material = ballMaterial;
+    sphere.position = new BABYLON.Vector3(Math.random() * 10, Math.random() * 250, Math.random() * 10);
+    shadowGenerator.addShadowCaster(sphere);
+    sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1 }, scene);
+    balls.push(sphere);
+}
 
-    // Playground
+function createFootballField(scene) {
+    var groundMat = createFloor(scene);
+    createFootballStands(scene);
+    var marcador = createScore(scene);
+    var goal = createGoal(scene);
+    return goal;
+}
+
+function createGoal(scene) {
+    var goalMaterial = new BABYLON.StandardMaterial("goal-material", scene);
+    goalMaterial.diffuseTexture = new BABYLON.Texture("textures/cuadrados.jpg", scene);
+    goalMaterial.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+    goalMaterial.diffuseTexture.uScale = 50;
+    goalMaterial.diffuseTexture.vScale = 50;
+    goalMaterial.alpha = 0.5;
+
+    var goal = BABYLON.Mesh.CreateBox("goal", 1, scene);
+    goal.scaling = new BABYLON.Vector3(60, 40, 1);
+    goal.position.y = -5.0;
+    goal.position.x = 0.0;
+    goal.position.z = 50.0;
+    goal.checkCollisions = true;
+    goal.material = goalMaterial;
+    goal.physicsImpostor = new BABYLON.PhysicsImpostor(goal
+                                    , BABYLON.PhysicsImpostor.BoxImpostor
+                                    , { mass: 0 }
+                                    , scene);
+    return goal;
+}
+
+function createScore(scene) {
+     //Create dynamic texture
+     var textureScore = new BABYLON.DynamicTexture("dynamic-texture", {width:100, height:100}, scene);   
+     var materialScore = new BABYLON.StandardMaterial("score-material", scene);   
+     materialScore.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5); 				
+     materialScore.diffuseTexture = textureScore;
+     textureScore.drawText(0, 10, 50, "bold 30px Arial", "green", "white", true, true);
+
+    var score = BABYLON.Mesh.CreateBox("score", 1, scene);
+    score.scaling = new BABYLON.Vector3(50, 10, 1);
+    score.position.y = 20.0;
+    score.position.x = 0.0;
+    score.position.z = 50.0;
+    score.material = materialScore;
+}
+
+function createFloor(scene) {
     var ground = BABYLON.Mesh.CreateBox("Ground", 1, scene);
     ground.scaling = new BABYLON.Vector3(100, 1, 100);
     ground.position.y = -5.0;
-
-    var groundMat = new BABYLON.StandardMaterial("groundMat", scene);
+    var groundMat = new BABYLON.StandardMaterial("ground-material", scene);
     groundMat.diffuseTexture = new BABYLON.Texture("textures/field.jpg", scene);
     //groundMat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
     //groundMat.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
     groundMat.backFaceCulling = false;
     ground.material = groundMat;
-   
     ground.receiveShadows = true;
     // Physics
     ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground
                                                         , BABYLON.PhysicsImpostor.BoxImpostor
                                                         , { mass: 0, friction: 0.5, restitution: 0.7 }
                                                         , scene);
+}
 
+
+function createFootballStands(scene) {
+    var standsMaterial = new BABYLON.StandardMaterial("stands-material", scene);
+    //standsMaterial.diffuseTexture = new BABYLON.Texture("textures/field.jpg", scene);
+    standsMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+    standsMaterial.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+    standsMaterial.backFaceCulling = false;
 
     var paredDerecha = BABYLON.Mesh.CreateBox("paredDerecha", 1, scene);
     paredDerecha.scaling = new BABYLON.Vector3(1, 100, 100);
     paredDerecha.position.y = -5.0;
     paredDerecha.position.x = 50.0;
     paredDerecha.checkCollisions = true;
-    paredDerecha.material = groundMat;
+
+    
+    paredDerecha.material = standsMaterial;
     paredDerecha.physicsImpostor = new BABYLON.PhysicsImpostor(paredDerecha
-                                                        , BABYLON.PhysicsImpostor.BoxImpostor
-                                                        , { mass: 0 }
-                                                        , scene);
+                                                                , BABYLON.PhysicsImpostor.BoxImpostor
+                                                                , { mass: 0 }
+                                                                , scene);
 
     var paredIzquierda = BABYLON.Mesh.CreateBox("paredIzquierda", 1, scene);
     paredIzquierda.scaling = new BABYLON.Vector3(1, 100, 100);
     paredIzquierda.position.y = -5.0;
     paredIzquierda.position.x = -50.0;
     paredIzquierda.checkCollisions = true;
-    paredIzquierda.material = groundMat;
+    paredIzquierda.material = standsMaterial;
     paredIzquierda.physicsImpostor = new BABYLON.PhysicsImpostor(paredIzquierda
-                                                        , BABYLON.PhysicsImpostor.BoxImpostor
-                                                        , { mass: 0 }
-                                                        , scene);
+                                                                    , BABYLON.PhysicsImpostor.BoxImpostor
+                                                                    , { mass: 0 }
+                                                                    , scene);
+}
 
 
-    var materialPorterial = new BABYLON.StandardMaterial("materialPorterial", scene);
-    materialPorterial.diffuseTexture = new BABYLON.Texture("textures/cuadrados.jpg", scene);
-    materialPorterial.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5);
-    materialPorterial.diffuseTexture.uScale = 50;
-    materialPorterial.diffuseTexture.vScale = 50;
-    materialPorterial.alpha = 0.5;
 
-    var porteria = BABYLON.Mesh.CreateBox("porteria", 1, scene);
-    porteria.scaling = new BABYLON.Vector3(60, 40, 1);
-    porteria.position.y = -5.0;
-    porteria.position.x = 0.0;
-    porteria.position.z = 50.0;
-    porteria.checkCollisions = true;
-    porteria.material = materialPorterial;
-    porteria.physicsImpostor = new BABYLON.PhysicsImpostor(porteria
-                                                        , BABYLON.PhysicsImpostor.BoxImpostor
-                                                        , { mass: 0 }
-                                                        , scene);
+function registerEvents(scene, goal, ballMaterial, balls) {
+    window.addEventListener("click", function (evt) {
+        // We try to pick an object
+        var pickResult = scene.pick(evt.clientX, evt.clientY);
+        if (pickResult.hit) {
+            currentMesh = pickResult.pickedMesh;
+            // Calculate the direction using the picked point and the ball's position. 
+            //var direction = pickResult.pickedPoint.subtract(currentMesh.position).normalize();
+            // Give it a bit more power (scale the normalized direction).
+            //var impulse = direction.scale(-20);
+            currentMesh.physicsImpostor.applyImpulse(new BABYLON.Vector3(0, 0, 100) //impulse
+                , currentMesh.getAbsolutePosition());
+        }
+    });
 
-    var materialCollision = materialAmiga.clone('materialCollision');
+
+    var materialCollision = ballMaterial.clone('materialCollision');
     materialCollision.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
 
     var goles = 0;
@@ -139,7 +184,7 @@ var createScene = function () {
             }
         }*/
         for (var i = 0; i < balls.length; i++) {
-            if (porteria.intersectsMesh(balls[i])){
+            if (goal.intersectsMesh(balls[i])){
                     balls[i].material= materialCollision;
                     //ballsToRemove.push(balls[i]);
                     /*goles++;
@@ -149,36 +194,53 @@ var createScene = function () {
                 }
             }
         });
-            
 
-    var marcador = BABYLON.Mesh.CreateBox("porteria", 1, scene);
-    marcador.scaling = new BABYLON.Vector3(50, 10, 1);
-    marcador.position.y = 20.0;
-    marcador.position.x = 0.0;
-    marcador.position.z = 50.0;
-
-    //Create dynamic texture
-    var textureScore = new BABYLON.DynamicTexture("dynamic texture", {width:100, height:100}, scene);   
-    var materialScore = new BABYLON.StandardMaterial("Mat", scene);   
-    materialScore.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5); 				
-    materialScore.diffuseTexture = textureScore;
-    marcador.material = materialScore;
-    textureScore.drawText(0, 10, 50, "bold 30px Arial", "green", "white", true, true);
-                
-    //scene.debugLayer.show();
-
-    return scene;
+        engine.runRenderLoop(function () {
+            if (game) {
+                game.render();
+            }
+        });
+        
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
 }
 
 
-var scene = createScene()
+var startGame = function () {
+    var scene = getScene();
+    createCameras(scene);
+    var light = createLights(scene);
+    var shadowGenerator = createShadowGenerator(light);
+    var ballMaterial = createBallMaterial(scene);
+    enablePhysics(scene);
 
-engine.runRenderLoop(function () {
-    if (scene) {
-        scene.render();
-    }
-});
+    var balls = createBalls(scene, ballMaterial, shadowGenerator);
 
-window.addEventListener("resize", function () {
-    engine.resize();
-});
+    var goal = createFootballField(scene);
+
+    registerEvents(scene, goal, ballMaterial, balls);
+
+    //scene.debugLayer.show();
+    
+    return scene;
+}
+
+var game = startGame()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
