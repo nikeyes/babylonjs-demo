@@ -8,8 +8,36 @@ function getScene() {
 }
 
 function createCameras(scene) {
-    var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, 0, -20), scene);
+    //var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, 0, -20), scene);
+    //var camera = new BABYLON.VRDeviceOrientationFreeCamera("vr-camera", new BABYLON.Vector3(0, 0, -20), scene);
+    var camera = new BABYLON.DeviceOrientationCamera("DevOr_camera", new BABYLON.Vector3(0, 0, -20), scene);
+    camera.angularSensibility = 10;
+    camera.moveSensibility = 10;
     camera.attachControl(canvas, true);
+
+    
+/*
+    let button = document.getElementById('vrButton');
+
+    function attachWebVR() {
+        camera.attachControl(canvas, true);
+        window.removeEventListener('click', attachWebVR, false);
+    }
+
+    button.addEventListener('click', attachWebVR, false );
+    */
+
+    /*
+        if (navigator.getVRDisplays) {
+            camera = new BABYLON.WebVRFreeCamera("WebVRCamera", 
+                        new BABYLON.Vector3(0, 2, 0), scene);
+        }
+        else {
+            camera = new BABYLON.VRDeviceOrientationFreeCamera("WebVRFallbackCamera", 
+                        new BABYLON.Vector3(0, 2, 0), scene);
+        }
+    */
+
 }
 
 function createLights(scene) {
@@ -60,9 +88,52 @@ function createFootballField(scene) {
     createFootballStands(scene);
     var marcador = createScore(scene);
     var goal = createGoal(scene);
+    //createGoalKeeper(scene);
     return goal;
 }
 
+function createGoalKeeper(scene) {
+    var goalKeeper = BABYLON.MeshBuilder.CreateBox("goal-keeper", {}, scene);
+
+    goalKeeper.scaling = new BABYLON.Vector3(5, 20, 1);
+
+    goalKeeper.position.y = 0.0;
+    goalKeeper.position.x = 2.0;
+    goalKeeper.position.z = 40.0;
+    goalKeeper.checkCollisions = true;
+    goalKeeper.physicsImpostor = new BABYLON.PhysicsImpostor(goalKeeper
+        , BABYLON.PhysicsImpostor.BoxImpostor
+        , { mass: 0 }
+        , scene);
+   
+    
+    var frameRate = 10;
+    var xSlide = new BABYLON.Animation("xSlide"
+                                        , "position.x"
+                                        , frameRate
+                                        , BABYLON.Animation.ANIMATIONTYPE_FLOAT
+                                        , BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+    var keyFrames = []; 
+
+    keyFrames.push({
+        frame: 0,
+        value: 30
+    });
+
+    keyFrames.push({
+        frame: frameRate,
+        value: -30
+    });
+
+    keyFrames.push({
+        frame: 2 * frameRate,
+        value: 30
+    });
+
+    xSlide.setKeys(keyFrames);
+
+    scene.beginDirectAnimation(goalKeeper, [xSlide], 0, 2 * frameRate, true);
+}
 function createGoal(scene) {
     var goalMaterial = new BABYLON.StandardMaterial("goal-material", scene);
     goalMaterial.diffuseTexture = new BABYLON.Texture("textures/cuadrados.jpg", scene);
@@ -221,8 +292,9 @@ var startGame = function () {
 
     registerEvents(scene, goal, ballMaterial, balls);
 
-    //scene.debugLayer.show();
+
     
+    //scene.debugLayer.show();    
     return scene;
 }
 
