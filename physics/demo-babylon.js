@@ -129,10 +129,19 @@ var createScene = function () {
     materialCollision.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
 
     var goles = 0;
+    //var ballsToRemove = ballsToRemove ||[];
     scene.registerBeforeRender(function() {
+        /*for (var i = 0; i < ballsToRemove.length; i++) {
+            var index = balls.indexOf(ballsToRemove[i]);
+            if(index != -1) {
+                balls.splice(index, 1);
+                ballsToRemove[i].dispose();
+            }
+        }*/
         for (var i = 0; i < balls.length; i++) {
             if (porteria.intersectsMesh(balls[i])){
                     balls[i].material= materialCollision;
+                    //ballsToRemove.push(balls[i]);
                     /*goles++;
                     balls.remove(ball[i]);
                     textureScore.clear();
